@@ -1,6 +1,7 @@
 // import 'dart:html';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // for hapticfeedback
 import 'custombutton.dart';
 
 void main() {
@@ -57,6 +58,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  int _factor = 2;
+  final _controller = TextEditingController();
 
   void _incrementCounter() {
     setState(() {
@@ -65,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
       // so that the display can reflect the updated values. If we changed
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
-      _counter++;
+      _counter+=_factor;
       // if(_counter%10==0){
       //   toggletheme()
       // }
@@ -74,16 +77,41 @@ class _MyHomePageState extends State<MyHomePage> {
   void _decrementCounter() {
     setState(() {
       if(_counter>0){
-        _counter--;
+        _counter-=_factor;
+        if(_counter<0){
+          _counter=0;
+        }
       }
+      
     });
   }
+
+  void _setFactor(value) {
+    setState(() {
+      _factor=int.parse(value);
+    });
+  }
+  // _controller.text
+  
+  @override
+  void initState() {
+    super.initState();
+    _controller.text="$_factor";
+  } 
 
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
+
+    // setState(() {
+    // _controller.selection = TextSelection(
+    //   baseOffset: 0,
+    //   extentOffset: _controller.text.length,
+    //   );
+      
+    // });
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
@@ -119,19 +147,15 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             Text(
               'Count: $_counter',
-              style: TextStyle(fontSize: 35),
+              style:const TextStyle(fontSize: 35),
             ),
-            // Text(
-            //   's',
-            //   style: Theme.of(context).textTheme.headlineMedium,
-            //   // style: TextStyle(fontSize: 25),
-            // ),
+            
           ],
         ),
         ),
       ),
       floatingActionButton:Container(
-        margin:EdgeInsets.fromLTRB(0, 0, 0, 40),
+        margin:const EdgeInsets.fromLTRB(0, 0, 0, 40),
       child:Row(
         // mainAxisAlignment: MainAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -141,7 +165,10 @@ class _MyHomePageState extends State<MyHomePage> {
       
         CustomButton(
           title: "decrease", 
-          onPressed: _decrementCounter, 
+          onPressed: (){
+            HapticFeedback.lightImpact();
+            _decrementCounter();
+            }, 
           color:const Color.fromARGB(255, 248, 4, 4),
           icon:const Icon(Icons.arrow_downward_rounded),
           // icon: Image.asset("assets/images/mic.png"),
@@ -149,17 +176,75 @@ class _MyHomePageState extends State<MyHomePage> {
 
         CustomButton(
           title: "increase", 
-          onPressed:(){}, 
+          onPressed:(){
+            showDialog(
+              context: context, 
+              builder: (context){
+                return Dialog(
+                  backgroundColor:const Color.fromARGB(255, 255, 255, 255),
+                  child: Padding(padding:const EdgeInsets.all(7),
+                    child:Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+
+                    const Text("Factor",
+                      style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.black,
+                      backgroundColor:Colors.transparent,
+                      ),
+                    ),
+                    
+                    
+                    SizedBox(
+              width: 200.0,
+              child: TextField(
+                        // controller: TextEditingController(text: "$_factor"),
+                        controller: _controller,
+                        onSubmitted: (value){
+                            _setFactor(value);
+                            Navigator.pop(context);
+                          },
+                        autofocus: true,
+                        decoration:const InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(borderSide: BorderSide(color: Colors.red)),
+                          hintText: 'Enter the factor',
+                        ),
+                        style:const TextStyle(
+                          backgroundColor:Color.fromARGB(255, 255, 255, 255),
+                          color:Colors.black,
+                          fontSize: 20,
+                        ),
+
+                        keyboardType: TextInputType.number,
+                        // inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        // strutStyle: StrutStyle(),
+                    ),
+                  ),
+                   
+                  ],
+                  ),
+
+                  ),
+                );
+                }
+              );
+            }, 
           color:const Color.fromARGB(255, 255, 255, 255), 
-          icon: Text("1",
-          style:TextStyle(color: Colors.black,fontSize:40),
+          icon: Text("$_factor",
+          style:const TextStyle(color: Colors.black,fontSize:40),
           ),
           // icon: Image.asset("assets/images/mic.png"),
           ),
 
         CustomButton(
           title: "increase", 
-          onPressed: _incrementCounter, 
+          onPressed: (){
+            HapticFeedback.heavyImpact();
+            _incrementCounter();
+            }, 
           color:const Color.fromARGB(255, 25, 255, 109), 
           icon:const Icon(Icons.arrow_upward_rounded),
           // icon: Image.asset("assets/images/mic.png"),
